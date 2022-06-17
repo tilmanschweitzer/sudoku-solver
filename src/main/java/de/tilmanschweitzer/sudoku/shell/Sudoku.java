@@ -100,7 +100,12 @@ public class Sudoku {
     }
 
     public Optional<SudokuPosition> getFirstUnsetPosition() {
-        for (SudokuPosition position: allPositions) {
+        return getFirstUnsetPosition(Optional.empty());
+    }
+
+    public Optional<SudokuPosition> getFirstUnsetPosition(Optional<SudokuPosition> latestPosition) {
+        final List<SudokuPosition> positions = latestPosition.isEmpty() ? allPositions : allPositions.stream().skip(latestPosition.get().getIndex()).collect(toUnmodifiableList());
+        for (SudokuPosition position: positions) {
             if (getValueForPosition(position) == 0) {
                 return Optional.of(position);
             }

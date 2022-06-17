@@ -6,7 +6,7 @@ import java.util.stream.IntStream;
 
 public class SudokuPosition {
     public static List<SudokuPosition> allPositions = IntStream.range(0, 81).boxed().map(SudokuPosition::new).collect(Collectors.toUnmodifiableList());
-    final int index;
+    private final int index;
 
     private SudokuPosition(int index) {
         this.index = index;

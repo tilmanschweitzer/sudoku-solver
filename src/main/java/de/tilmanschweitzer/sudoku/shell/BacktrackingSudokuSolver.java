@@ -1,6 +1,5 @@
 package de.tilmanschweitzer.sudoku.shell;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,7 +14,7 @@ public class BacktrackingSudokuSolver implements SudokuSolver {
     @Override
     public Sudoku solve(Sudoku sudoku) {
 
-        final List<Sudoku> solutions = solutions(sudoku);
+        final List<Sudoku> solutions = solutions(sudoku, Optional.empty());
 
         if (solutions.size() == 0) {
             throw new RuntimeException("No solution found");
@@ -27,24 +26,23 @@ public class BacktrackingSudokuSolver implements SudokuSolver {
         return solutions.get(0);
     }
 
-
-    private List<Sudoku> solutions(Sudoku sudoku) {
+    private List<Sudoku> solutions(Sudoku sudoku, Optional<SudokuPosition> latestPosition) {
         if (!sudoku.isValid()) {
             return emptyList();
         } else if (sudoku.isCompleted()) {
             return singletonList(sudoku);
         }
 
-        final Optional<SudokuPosition> firstUnsetPositionOptional = sudoku.getFirstUnsetPosition();
+        final Optional<SudokuPosition> firstUnsetPositionOptional = sudoku.getFirstUnsetPosition(latestPosition);
         if (firstUnsetPositionOptional.isEmpty()) {
             throw new RuntimeException("Excepted to have at least one unset position when sudoku is not completed");
         }
 
         final SudokuPosition position = firstUnsetPositionOptional.get();
-        return IntStream.range(1, 10).boxed().map((value) -> {
+        return IntStream.range(1, 10).boxed().parallel().map((value) -> {
             final Sudoku copy = Sudoku.fromSudoku(sudoku);
             copy.setValueForPosition(position, value);
-            return solutions(copy);
+            return solutions(copy, firstUnsetPositionOptional);
         }).reduce((sudokus, sudokus2) -> Stream.concat(sudokus.stream(), sudokus2.stream()).collect(Collectors.toUnmodifiableList())).orElse(emptyList());
     }
 }
