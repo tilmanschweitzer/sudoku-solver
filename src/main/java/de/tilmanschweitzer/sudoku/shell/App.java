@@ -39,7 +39,7 @@ public class App {
 
                 System.out.println(unsolvedSudoku);
                 System.out.println(solvedSudoku);
-                System.out.println("Execution took: " + executionTimer.getLatestExecutionTime() + "ms");
+                System.out.println("Execution took: " + executionTimer.getLatestExecutionTime().orElse(0L) + "ms");
                 System.out.println("==============================\n");
 
                 return solvedSudoku.equals(expectedSolution);

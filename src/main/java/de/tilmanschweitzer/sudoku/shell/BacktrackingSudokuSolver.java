@@ -14,19 +14,23 @@ public class BacktrackingSudokuSolver implements SudokuSolver {
     @Override
     public Sudoku solve(Sudoku sudoku) {
 
-        final List<Sudoku> solutions = solutions(sudoku, Optional.empty());
+        final List<Sudoku> solutions = findSolutions(sudoku);
 
         if (solutions.size() == 0) {
             throw new RuntimeException("No solution found");
         }
         if (solutions.size() > 1) {
-            throw new RuntimeException("Multiple solutions found");
+            throw new RuntimeException("Found " + solutions.size() + " solutions");
         }
 
         return solutions.get(0);
     }
 
-    private List<Sudoku> solutions(Sudoku sudoku, Optional<SudokuPosition> latestPosition) {
+    public List<Sudoku> findSolutions(Sudoku sudoku) {
+        return findSolutions(sudoku, Optional.empty());
+    }
+
+    private List<Sudoku> findSolutions(Sudoku sudoku, Optional<SudokuPosition> latestPosition) {
         if (!sudoku.isValid()) {
             return emptyList();
         } else if (sudoku.isCompleted()) {
@@ -42,7 +46,7 @@ public class BacktrackingSudokuSolver implements SudokuSolver {
         return IntStream.range(1, 10).boxed().parallel().map((value) -> {
             final Sudoku copy = Sudoku.fromSudoku(sudoku);
             copy.setValueForPosition(position, value);
-            return solutions(copy, firstUnsetPositionOptional);
+            return findSolutions(copy, firstUnsetPositionOptional);
         }).reduce((sudokus, sudokus2) -> Stream.concat(sudokus.stream(), sudokus2.stream()).collect(Collectors.toUnmodifiableList())).orElse(emptyList());
     }
 }
