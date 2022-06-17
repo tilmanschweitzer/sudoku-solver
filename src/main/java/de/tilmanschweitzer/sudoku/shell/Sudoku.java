@@ -11,7 +11,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 public class Sudoku {
     private final int[][] sudoku = new int[9][9]; // int[row][col]
 
-    private Sudoku(int[][] sudoku) {
+    protected Sudoku(int[][] sudoku) {
         for (SudokuPosition position : allPositions) {
             setValueForPosition(position, sudoku[position.getRow()][position.getCol()]);
         }
@@ -83,12 +83,16 @@ public class Sudoku {
         return value == 0;
     }
 
-    private static boolean isValidValue(int value) {
+    public static boolean isValidValue(int value) {
         return value >= 1 && value <= 9;
     }
 
     public boolean isCompleted() {
-        return allPositions.size() == allPositions.stream().map(this::getValueForPosition).filter(Sudoku::isValidValue).count();
+        return allPositions.size() == allPositions.stream().filter(this::isPositionValid).count();
+    }
+
+    public boolean isPositionValid(SudokuPosition position) {
+        return isValidValue(getValueForPosition(position));
     }
 
     public int getValueForPosition(SudokuPosition position) {
@@ -104,7 +108,9 @@ public class Sudoku {
     }
 
     public Optional<SudokuPosition> getFirstUnsetPosition(Optional<SudokuPosition> latestPosition) {
-        final List<SudokuPosition> positions = latestPosition.isEmpty() ? allPositions : allPositions.stream().skip(latestPosition.get().getIndex()).collect(toUnmodifiableList());
+        final List<SudokuPosition> positions = latestPosition.isEmpty() ? allPositions : allPositions.stream()
+                .skip(latestPosition.get().getIndex())
+                .collect(toUnmodifiableList());
         for (SudokuPosition position: positions) {
             if (getValueForPosition(position) == 0) {
                 return Optional.of(position);

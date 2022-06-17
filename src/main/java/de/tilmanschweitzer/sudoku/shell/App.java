@@ -22,7 +22,7 @@ public class App {
         final int offset = 1;
         final int limit = 100;
 
-        final SudokuSolver sudokuSolver = new BacktrackingSudokuSolver();
+        final SudokuSolver sudokuSolver = new DeductiveSudokuSolver(new BacktrackingSudokuSolver());
         final ExecutionTimer executionTimer = new ExecutionTimer();
 
         try (BufferedReader bufferedReader = Files.newBufferedReader(Path.of(filename))) {

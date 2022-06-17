@@ -6,7 +6,7 @@
 
 Execution time statistics for 100 Sudokus
 
-### First implementation (git hash: 36bfaf7)
+#### First implementation (git hash: 36bfaf7)
 
 * Sum of execution times: 7815ms
 * Average execution time: 78ms
@@ -15,7 +15,7 @@ Execution time statistics for 100 Sudokus
 * Max execution time: 745ms
 
 
-### Improve implementation with parallel streams (git hash: ***)
+#### Improve implementation with parallel streams (git hash: aecfb3f)
 
 * Sum of execution times: 2142ms
 * Average execution time: 21ms
@@ -23,3 +23,24 @@ Execution time statistics for 100 Sudokus
 * Min execution time: 1ms
 * Max execution time: 196ms
 
+### DeductiveSudokuSolver
+
+#### First implementation (git hash: ***)
+
+Only solves 89 of 100 sudokus
+
+* Sum of execution times: 41ms
+* Average execution time: 0ms
+* Median execution time: 0ms
+* Min execution time: 0ms
+* Max execution time: 6ms
+
+### DeductiveSudokuSolver (with BacktrackingSudokuSolver as fallback)
+
+#### First implementation (git hash: ***)
+
+* Sum of execution times: 556ms
+* Average execution time: 5ms
+* Median execution time: 0ms
+* Min execution time: 0ms
+* Max execution time: 115ms
