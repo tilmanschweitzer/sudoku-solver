@@ -6,11 +6,14 @@ import java.util.stream.IntStream;
 
 public class SudokuPosition {
     public static List<SudokuPosition> allPositions = IntStream.range(0, 81).boxed().map(SudokuPosition::new).collect(Collectors.toUnmodifiableList());
-
     final int index;
 
     private SudokuPosition(int index) {
         this.index = index;
+    }
+
+    public static SudokuPosition of(int row, int col) {
+        return new SudokuPosition(row * 9 + col);
     }
 
     public int getIndex() {
@@ -18,10 +21,10 @@ public class SudokuPosition {
     }
 
     public int getRow() {
-        return index % 9;
+        return index / 9;
     }
 
     public int getCol() {
-        return index / 9;
+        return index % 9;
     }
 }
