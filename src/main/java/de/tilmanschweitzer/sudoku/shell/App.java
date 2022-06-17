@@ -20,7 +20,9 @@ public class App {
 
         final String filename = args[0];
         final int offset = 1;
-        final int limit = 1;
+        final int limit = 100;
+
+        final SudokuSolver sudokuSolver = new BacktrackingSudokuSolver();
 
         try (BufferedReader bufferedReader = Files.newBufferedReader(Path.of(filename))) {
             final List<Boolean> solvedSudokus = bufferedReader.lines().skip(offset).limit(limit).map((line) -> {
@@ -30,12 +32,15 @@ public class App {
                 }
 
                 final Sudoku unsolvedSudoku = Sudoku.fromString(split[0]);
-                final Sudoku solvedSudoku = Sudoku.fromString(split[1]);
+                final Sudoku expectedSolution = Sudoku.fromString(split[1]);
+
+                final Sudoku solvedSudoku = sudokuSolver.solve(unsolvedSudoku);
 
                 System.out.println(unsolvedSudoku);
                 System.out.println(solvedSudoku);
+                System.out.println("==============================\n");
 
-                return unsolvedSudoku.equals(solvedSudoku);
+                return solvedSudoku.equals(expectedSolution);
             }).collect(Collectors.toUnmodifiableList());
 
             long numberOfSolvedSudokus = solvedSudokus.stream().filter(Boolean::booleanValue).count();

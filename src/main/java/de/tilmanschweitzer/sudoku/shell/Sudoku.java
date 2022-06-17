@@ -2,6 +2,7 @@ package de.tilmanschweitzer.sudoku.shell;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static de.tilmanschweitzer.sudoku.shell.SudokuPosition.allPositions;
@@ -78,6 +79,10 @@ public class Sudoku {
         return IntStream.range(0, 9).boxed().filter(field -> hasDuplicateValues(getField(field))).findAny().isEmpty();
     }
 
+    private static boolean isUnsetValue(int value) {
+        return value == 0;
+    }
+
     private static boolean isValidValue(int value) {
         return value >= 1 && value <= 9;
     }
@@ -92,6 +97,15 @@ public class Sudoku {
 
     public void setValueForPosition(SudokuPosition position, int value) {
         sudoku[position.getRow()][position.getCol()] = value;
+    }
+
+    public Optional<SudokuPosition> getFirstUnsetPosition() {
+        for (SudokuPosition position: allPositions) {
+            if (getValueForPosition(position) == 0) {
+                return Optional.of(position);
+            }
+        }
+        return Optional.empty();
     }
 
     public String toPrintableString(String horizontalFieldDelimiter, String spacer) {
