@@ -23,6 +23,7 @@ public class App {
         final int limit = 100;
 
         final SudokuSolver sudokuSolver = new BacktrackingSudokuSolver();
+        final ExecutionTimer executionTimer = new ExecutionTimer();
 
         try (BufferedReader bufferedReader = Files.newBufferedReader(Path.of(filename))) {
             final List<Boolean> solvedSudokus = bufferedReader.lines().skip(offset).limit(limit).map((line) -> {
@@ -34,10 +35,11 @@ public class App {
                 final Sudoku unsolvedSudoku = Sudoku.fromString(split[0]);
                 final Sudoku expectedSolution = Sudoku.fromString(split[1]);
 
-                final Sudoku solvedSudoku = sudokuSolver.solve(unsolvedSudoku);
+                final Sudoku solvedSudoku = executionTimer.execute(() -> sudokuSolver.solve(unsolvedSudoku));
 
                 System.out.println(unsolvedSudoku);
                 System.out.println(solvedSudoku);
+                System.out.println("Execution took: " + executionTimer.getLatestExecutionTime() + "ms");
                 System.out.println("==============================\n");
 
                 return solvedSudoku.equals(expectedSolution);
@@ -45,6 +47,13 @@ public class App {
 
             long numberOfSolvedSudokus = solvedSudokus.stream().filter(Boolean::booleanValue).count();
             System.out.println("Solved " + numberOfSolvedSudokus + " of " + solvedSudokus.size() + " sudokus");
+            System.out.println("==============================\n");
+            System.out.println("Execution time statistics:");
+            System.out.println("Sum of execution times: " + executionTimer.getExecutionTimeSum().orElse(0L) + "ms");
+            System.out.println("Average execution time: " + executionTimer.getAverageExecutionTime().orElse(0L) + "ms");
+            System.out.println("Median execution time: " + executionTimer.getMedianExecutionTime().orElse(0L) + "ms");
+            System.out.println("Min execution time: " + executionTimer.getMinExecutionTime().orElse(0L) + "ms");
+            System.out.println("Max execution time: " + executionTimer.getMaxExecutionTime().orElse(0L) + "ms");
         }
     }
 }
