@@ -167,5 +167,70 @@ public class DeductiveSudokuSolver implements SudokuSolver {
             return false;
         }
 
+        public String toPrintableString() {
+            final String horizontalFieldDelimiter = "|";
+            final String spacer = " ";
+            final String longSpacer = "      ";
+            final String lineSeparator = "|| --- --- --- | --- --- --- | --- --- --- || --- --- --- | --- --- --- | --- --- --- || --- --- --- | --- --- --- | --- --- --- ||\n";
+            final String lineFiller = lineSeparator.replaceAll("-", " ");
+            final String boxSeparator = lineSeparator.replaceAll("-", "=");
+            final String possibleValuesTemplate = "123 456 789";
+
+            final StringBuffer sb = new StringBuffer();
+            final StringBuffer possibleValuesSb = new StringBuffer();
+
+            sb.append(boxSeparator);
+
+            for (SudokuPosition position : allPositions) {
+                int value = internalSudoku.getValueForPosition(position);
+                final String valueAsString = value == 0 ? " " : value + "";
+                if (position.getCol() % 3 == 0 && !horizontalFieldDelimiter.isBlank()) {
+                    sb.append(horizontalFieldDelimiter).append(horizontalFieldDelimiter).append(longSpacer);
+                    possibleValuesSb.append(horizontalFieldDelimiter).append(horizontalFieldDelimiter).append(spacer);
+                } else {
+                    sb.append(horizontalFieldDelimiter).append(longSpacer);
+                    possibleValuesSb.append(horizontalFieldDelimiter).append(spacer);
+
+                }
+                sb.append(ANSI_RED).append(valueAsString).append(ANSI_RESET).append(longSpacer);
+
+                if (value == 0) {
+                    final List<Integer> possibleValuesForPosition = possibleValues[position.getRow()][position.getCol()];
+                    final String possibleValuesAsString = Arrays.stream(possibleValuesTemplate.split("")).map(c -> {
+                        if (c.isBlank() || possibleValuesForPosition.contains(Integer.parseInt(c))) {
+                            return c;
+                        }
+                        return " ";
+                    }).collect(Collectors.joining());
+
+                    possibleValuesSb.append(possibleValuesAsString).append(spacer);
+                } else {
+                    possibleValuesSb.append(longSpacer).append(longSpacer);
+                }
+
+                if (position.getCol() == 8) {
+                    sb.append(horizontalFieldDelimiter).append("|\n");
+                    sb.append(lineFiller);
+                    sb.append(possibleValuesSb).append("||\n");
+                    possibleValuesSb.delete(0, possibleValuesSb.length());
+                    sb.append(lineFiller);
+                    if (position.getRow() % 3 == 2) {
+                        sb.append(boxSeparator);
+                    } else {
+                        sb.append(lineSeparator);
+                    }
+                }
+            }
+
+            return sb.toString();
+        }
+
+        public static final String ANSI_RESET = "\u001B[0m";
+        public static final String ANSI_RED = "\u001B[31m";
+
+        public String toString() {
+            return toPrintableString();
+        }
+
     }
 }
