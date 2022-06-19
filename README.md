@@ -1,6 +1,6 @@
 # sudoku-solver
 
-## Executions times
+## Executions times for 100 Sudokus
 
 ### BacktrackingSudokuSolver
 
@@ -25,7 +25,7 @@ Execution time statistics for 100 Sudokus
 
 ### DeductiveSudokuSolver
 
-#### First implementation (git hash: ***)
+#### First implementation (git hash: a7c8982)
 
 Only solves 89 of 100 sudokus
 
@@ -35,9 +35,19 @@ Only solves 89 of 100 sudokus
 * Min execution time: 0ms
 * Max execution time: 6ms
 
+#### Improved DeductiveSudokuSolver (git hash: )
+
+Can solve 100 of 100 test sudokus
+
+* Sum of execution times: 61ms
+* Average execution time: 0ms
+* Median execution time: 0ms
+* Min execution time: 0ms
+* Max execution time: 10ms
+
 ### DeductiveSudokuSolver (with BacktrackingSudokuSolver as fallback)
 
-#### First implementation (git hash: ***)
+#### First implementation (git hash: a7c8982)
 
 * Sum of execution times: 556ms
 * Average execution time: 5ms

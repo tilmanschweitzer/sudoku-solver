@@ -6,18 +6,30 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static de.tilmanschweitzer.sudoku.shell.Sudoku.isValidValue;
+import static java.util.stream.Collectors.summarizingDouble;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
 public class DeductiveSudokuSolver implements SudokuSolver {
 
-    private final Optional<SudokuSolver> fallbackSolver;
+    private final SudokuSolver fallbackSolver;
+    private final boolean failWhenUnsolved;
 
-    public DeductiveSudokuSolver() {
-        this(null);
+    private DeductiveSudokuSolver() {
+        this(null, false);
     }
-    public DeductiveSudokuSolver(SudokuSolver fallbackSolver) {
-        this.fallbackSolver = Optional.ofNullable(fallbackSolver);
+
+    private DeductiveSudokuSolver(SudokuSolver fallbackSolver, boolean failWhenUnsolved) {
+        this.fallbackSolver = fallbackSolver;
+        this.failWhenUnsolved = failWhenUnsolved;
+    }
+
+    public static DeductiveSudokuSolver createWithFallbackSolver(SudokuSolver fallbackSolver) {
+        return new DeductiveSudokuSolver(fallbackSolver, true);
+    }
+
+    public static DeductiveSudokuSolver withFailWhenUnsolved(boolean failWhenUnsolved) {
+        return new DeductiveSudokuSolver(null, failWhenUnsolved);
     }
 
     @Override
@@ -32,6 +44,9 @@ public class DeductiveSudokuSolver implements SudokuSolver {
         do {
             changedSomethingInTheLastIteration = false;
             for (SudokuPosition position : SudokuPosition.allPositions) {
+                if (sudoku.alreadySet(position)) {
+                    continue;
+                }
                 boolean hasChanged = sudoku.check(position);
                 if (hasChanged) {
                     changedSomethingInTheLastIteration = true;
@@ -41,10 +56,12 @@ public class DeductiveSudokuSolver implements SudokuSolver {
         } while (!sudoku.internalSudoku.isCompleted() && changedSomethingInTheLastIteration);
 
         if (!sudoku.internalSudoku.isCompleted()) {
-            if (fallbackSolver.isPresent()) {
-                return fallbackSolver.get().solve(sudoku.internalSudoku);
+            if (failWhenUnsolved) {
+                throw new RuntimeException("Solver found no solution");
             }
-            throw new RuntimeException("Solver found no solution");
+            if (fallbackSolver != null) {
+                return fallbackSolver.solve(sudoku.internalSudoku);
+            }
         }
 
         return sudoku.internalSudoku;
@@ -67,22 +84,53 @@ public class DeductiveSudokuSolver implements SudokuSolver {
             }
         }
 
-        private boolean check(SudokuPosition position) {
-            if (internalSudoku.isPositionValid(position)) {
-                return false;
-            }
+        private boolean alreadySet(SudokuPosition position) {
+            return internalSudoku.isPositionValid(position);
+        }
 
+        private boolean check(SudokuPosition position) {
             final List<Integer> possibleValuesForPosition = possibleValues[position.getRow()][position.getCol()];
 
-            if (possibleValuesForPosition.size() > 1) {
-                return false;
+            if (possibleValuesForPosition.size() == 1) {
+                int lastPossibleValue = possibleValuesForPosition.get(0);
+                setValue(position, lastPossibleValue);
+                return true;
+            } else {
+                for (Integer possibleValueForPosition : possibleValuesForPosition) {
+                    if (checkIfValueIsUniquePosition(position, possibleValueForPosition)) {
+                        setValue(position, possibleValueForPosition);
+                        return true;
+                    }
+                }
             }
-
-
-            int lastPossibleValue = possibleValuesForPosition.get(0);
-            setValue(position, lastPossibleValue);
-            return true;
+            return false;
         }
+
+        private boolean checkIfValueIsUniquePosition(SudokuPosition position, int possibleValueForPosition) {
+            return countPossiblePositionsForValueInRow(position, possibleValueForPosition) == 1
+                    || countPossiblePositionsForValueInCol(position, possibleValueForPosition) == 1
+                    || countPossiblePositionsForValueInField(position, possibleValueForPosition) == 1;
+        }
+
+        private long countPossiblePositionsForValueInRow(SudokuPosition position, int possibleValueForPosition) {
+            return IntStream.range(0, 9).filter(index -> possibleValues[position.getRow()][index].contains(possibleValueForPosition)).count();
+        }
+
+        private long countPossiblePositionsForValueInCol(SudokuPosition position, int possibleValueForPosition) {
+            return IntStream.range(0, 9).filter(index -> possibleValues[index][position.getCol()].contains(possibleValueForPosition)).count();
+        }
+
+        private long countPossiblePositionsForValueInField(SudokuPosition position, int possibleValueForPosition) {
+            return IntStream.range(0, 9).filter(index -> {
+                int fieldStartCol = (position.getCol() / 3) * 3;
+                int fieldStartRow = (position.getRow() / 3) * 3;
+
+                final int fieldCol = fieldStartCol + index / 3;
+                final int fieldRow = fieldStartRow + index % 3;
+                return possibleValues[fieldRow][fieldCol].contains(possibleValueForPosition);
+            }).count();
+        }
+
 
         private boolean setValue(SudokuPosition position, int value) {
             if (internalSudoku.isPositionValid(position)) {
