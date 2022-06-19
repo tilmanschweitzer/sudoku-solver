@@ -1,4 +1,4 @@
-package de.tilmanschweitzer.sudoku.shell;
+package de.tilmanschweitzer.sudoku.model;
 
 public class SudokuFormatException extends RuntimeException {
 }

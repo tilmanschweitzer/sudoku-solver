@@ -1,4 +1,9 @@
-package de.tilmanschweitzer.sudoku.shell;
+package de.tilmanschweitzer.sudoku.app;
+
+import de.tilmanschweitzer.sudoku.model.Sudoku;
+import de.tilmanschweitzer.sudoku.model.SudokuFormatException;
+import de.tilmanschweitzer.sudoku.solver.DeductiveSudokuSolver;
+import de.tilmanschweitzer.sudoku.solver.SudokuSolver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +25,7 @@ public class App {
 
         final String filename = args[0];
         final int offset = 1;
-        final int limit = 100;
+        final int limit = args.length > 1 ? Integer.parseInt(args[1]) : 100;
 
         final SudokuSolver sudokuSolver = DeductiveSudokuSolver.withFailWhenUnsolved(false);
         final ExecutionTimer executionTimer = new ExecutionTimer();

@@ -1,12 +1,13 @@
-package de.tilmanschweitzer.sudoku.shell;
+package de.tilmanschweitzer.sudoku.solver;
+
+import de.tilmanschweitzer.sudoku.model.Sudoku;
+import de.tilmanschweitzer.sudoku.model.SudokuPosition;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
-import static de.tilmanschweitzer.sudoku.shell.Sudoku.isValidValue;
-import static java.util.stream.Collectors.summarizingDouble;
+import static de.tilmanschweitzer.sudoku.model.Sudoku.isValidValue;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 

@@ -1,4 +1,4 @@
-package de.tilmanschweitzer.sudoku.shell;
+package de.tilmanschweitzer.sudoku.app;
 
 import java.util.ArrayList;
 import java.util.List;

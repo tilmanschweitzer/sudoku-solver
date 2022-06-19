@@ -1,5 +1,8 @@
-package de.tilmanschweitzer.sudoku.shell;
+package de.tilmanschweitzer.sudoku.model;
 
+import de.tilmanschweitzer.sudoku.model.Sudoku;
+import de.tilmanschweitzer.sudoku.model.SudokuFormatException;
+import de.tilmanschweitzer.sudoku.model.SudokuPosition;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package de.tilmanschweitzer.sudoku.shell;
+package de.tilmanschweitzer.sudoku.model;
 
 import java.util.List;
 import java.util.stream.Collectors;

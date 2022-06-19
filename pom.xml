@@ -32,7 +32,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>de.tilmanschweitzer.sudoku.shell.App</mainClass>
+                            <mainClass>de.tilmanschweitzer.sudoku.app.App</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

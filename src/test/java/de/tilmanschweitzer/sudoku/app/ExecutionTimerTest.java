@@ -1,5 +1,6 @@
-package de.tilmanschweitzer.sudoku.shell;
+package de.tilmanschweitzer.sudoku.app;
 
+import de.tilmanschweitzer.sudoku.app.ExecutionTimer;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;

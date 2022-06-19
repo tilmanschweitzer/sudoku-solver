@@ -1,11 +1,11 @@
-package de.tilmanschweitzer.sudoku.shell;
+package de.tilmanschweitzer.sudoku.model;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import static de.tilmanschweitzer.sudoku.shell.SudokuPosition.allPositions;
+import static de.tilmanschweitzer.sudoku.model.SudokuPosition.allPositions;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class Sudoku {
