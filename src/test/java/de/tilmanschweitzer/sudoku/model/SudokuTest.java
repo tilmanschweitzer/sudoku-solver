@@ -1,8 +1,5 @@
 package de.tilmanschweitzer.sudoku.model;
 
-import de.tilmanschweitzer.sudoku.model.Sudoku;
-import de.tilmanschweitzer.sudoku.model.SudokuFormatException;
-import de.tilmanschweitzer.sudoku.model.SudokuPosition;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,15 +60,15 @@ class SudokuTest {
 
     @Test
     public void getField_returnsExpectedFields() {
-        assertEquals(List.of(6, 7, 9, 5, 4, 3, 8, 2, 1), testSudoku.getField(0));
-        assertEquals(List.of(5, 1, 8, 7, 2, 9, 6, 3, 4), testSudoku.getField(1));
-        assertEquals(List.of(2, 4, 3, 6, 1, 8, 9, 5, 7), testSudoku.getField(2));
-        assertEquals(List.of(7, 9, 4, 3, 5, 8, 2, 1, 6), testSudoku.getField(3));
-        assertEquals(List.of(3, 5, 2, 4, 6, 1, 8, 9, 7), testSudoku.getField(4));
-        assertEquals(List.of(1, 8, 6, 7, 2, 9, 5, 3, 4), testSudoku.getField(5));
-        assertEquals(List.of(4, 8, 5, 9, 6, 2, 1, 3, 7), testSudoku.getField(6));
-        assertEquals(List.of(2, 7, 6, 1, 8, 3, 9, 4, 5), testSudoku.getField(7));
-        assertEquals(List.of(3, 9, 1, 4, 7, 5, 8, 6, 2), testSudoku.getField(8));
+        assertEquals(List.of(6, 7, 9, 5, 4, 3, 8, 2, 1), testSudoku.getBox(0));
+        assertEquals(List.of(5, 1, 8, 7, 2, 9, 6, 3, 4), testSudoku.getBox(1));
+        assertEquals(List.of(2, 4, 3, 6, 1, 8, 9, 5, 7), testSudoku.getBox(2));
+        assertEquals(List.of(7, 9, 4, 3, 5, 8, 2, 1, 6), testSudoku.getBox(3));
+        assertEquals(List.of(3, 5, 2, 4, 6, 1, 8, 9, 7), testSudoku.getBox(4));
+        assertEquals(List.of(1, 8, 6, 7, 2, 9, 5, 3, 4), testSudoku.getBox(5));
+        assertEquals(List.of(4, 8, 5, 9, 6, 2, 1, 3, 7), testSudoku.getBox(6));
+        assertEquals(List.of(2, 7, 6, 1, 8, 3, 9, 4, 5), testSudoku.getBox(7));
+        assertEquals(List.of(3, 9, 1, 4, 7, 5, 8, 6, 2), testSudoku.getBox(8));
     }
 
     @Test

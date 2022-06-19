@@ -43,7 +43,7 @@ public class Sudoku {
     }
 
     public boolean isValid() {
-        return allRowsAreValid() && allColsAreValid() && allFieldsAreValid();
+        return allRowsAreValid() && allColsAreValid() && allBoxesAreValid();
     }
 
     public int[][] getSudoku() {
@@ -57,10 +57,10 @@ public class Sudoku {
         return IntStream.range(0, 9).map(row -> sudoku[row][col]).boxed().collect(toUnmodifiableList());
     }
 
-    public List<Integer> getField(int field) {
+    public List<Integer> getBox(int box) {
         return IntStream.range(0, 9).map(index -> {
-            final int row = (field / 3) * 3 + index / 3;
-            final int col = (field % 3) * 3 + index % 3;
+            final int row = (box / 3) * 3 + index / 3;
+            final int col = (box % 3) * 3 + index % 3;
             return sudoku[row][col];
         }).boxed().collect(toUnmodifiableList());
     }
@@ -75,8 +75,8 @@ public class Sudoku {
     private boolean allColsAreValid() {
         return IntStream.range(0, 9).boxed().filter(col -> hasDuplicateValues(getCol(col))).findAny().isEmpty();
     }
-    private boolean allFieldsAreValid() {
-        return IntStream.range(0, 9).boxed().filter(field -> hasDuplicateValues(getField(field))).findAny().isEmpty();
+    private boolean allBoxesAreValid() {
+        return IntStream.range(0, 9).boxed().filter(box -> hasDuplicateValues(getBox(box))).findAny().isEmpty();
     }
 
     private static boolean isUnsetValue(int value) {
