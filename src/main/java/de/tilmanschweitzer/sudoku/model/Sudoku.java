@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static de.tilmanschweitzer.sudoku.model.SudokuPosition.allPositions;
+import static de.tilmanschweitzer.sudoku.model.SudokuUtils.hasDuplicateValues;
+import static de.tilmanschweitzer.sudoku.model.SudokuUtils.isValidValue;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class Sudoku {
@@ -65,10 +67,6 @@ public class Sudoku {
         }).boxed().collect(toUnmodifiableList());
     }
 
-    private boolean hasDuplicateValues(List<Integer> values) {
-        final List<Integer> validValues = values.stream().filter(Sudoku::isValidValue).collect(toUnmodifiableList());
-        return validValues.size() > validValues.stream().distinct().count();
-    }
     private boolean allRowsAreValid() {
         return IntStream.range(0, 9).boxed().filter(row -> hasDuplicateValues(getRow(row))).findAny().isEmpty();
     }
@@ -79,13 +77,7 @@ public class Sudoku {
         return IntStream.range(0, 9).boxed().filter(box -> hasDuplicateValues(getBox(box))).findAny().isEmpty();
     }
 
-    private static boolean isUnsetValue(int value) {
-        return value == 0;
-    }
 
-    public static boolean isValidValue(int value) {
-        return value >= 1 && value <= 9;
-    }
 
     public boolean isCompleted() {
         return allPositions.size() == allPositions.stream().filter(this::isPositionValid).count();

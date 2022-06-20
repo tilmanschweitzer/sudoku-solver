@@ -25,8 +25,8 @@ class DeductiveSudokuSolverTest {
     Sudoku unsolvedSudokuLevel2Boxes;
     Sudoku solvedSudokuLevel2Boxes;
 
-    Sudoku unsolvedSudokuLevel3NakedPair;
-    Sudoku solvedSudokuLevel3NakedPair;
+    Sudoku unsolvedSudokuLevel3ConjugatePair;
+    Sudoku solvedSudokuLevel3ConjugatePair;
 
     Sudoku unsolvedSudokuLevel3XYWing;
     Sudoku solvedSudokuLevel3XYWing;
@@ -48,9 +48,9 @@ class DeductiveSudokuSolverTest {
         unsolvedSudokuLevel2Boxes = Sudoku.fromString("090060085180002369360900000050040008000009004074200050000736590700000000509000073");
         solvedSudokuLevel2Boxes = Sudoku.fromString("497361285185472369362958417953647128621589734874213956248736591736195842519824673");
 
-        // Naked pair
-        unsolvedSudokuLevel3NakedPair = Sudoku.fromString("600090103500008400000200090000006005000000930020070608050302019098400000207059004");
-        solvedSudokuLevel3NakedPair = Sudoku.fromString("642795183519638427873241596384916275765824931921573648456382719198467352237159864");
+        // Conjugate pair
+        unsolvedSudokuLevel3ConjugatePair = Sudoku.fromString("600090103500008400000200090000006005000000930020070608050302019098400000207059004");
+        solvedSudokuLevel3ConjugatePair = Sudoku.fromString("642795183519638427873241596384916275765824931921573648456382719198467352237159864");
 
         unsolvedSudokuLevel3XYWing = Sudoku.fromString("010060078000821004400500012000050460000206000706300080390000705000003120672005009");
         solvedSudokuLevel3XYWing = Sudoku.fromString("215469378937821654468537912129758463843216597756394281391682745584973126672145839");
@@ -90,9 +90,9 @@ class DeductiveSudokuSolverTest {
     }
 
     @Test
-    public void solve_solvesTheSudokuLevel3NakedPair() {
-        final Sudoku result = sudokuSolver.solve(unsolvedSudokuLevel3NakedPair);
-        assertThat(result, equalTo(solvedSudokuLevel3NakedPair));
+    public void solve_solvesTheSudokuLevel3ConjugatePair() {
+        final Sudoku result = sudokuSolver.solve(unsolvedSudokuLevel3ConjugatePair);
+        assertThat(result, equalTo(solvedSudokuLevel3ConjugatePair));
     }
 
     @Test

@@ -93,4 +93,12 @@ public class SudokuPosition {
         }
         return index == ((SudokuPosition) obj).index;
     }
+
+    @Override
+    public String toString() {
+        return "SudokuPosition{" +
+                "row=" + getRow() +
+                ", col=" + getCol() +
+                '}';
+    }
 }

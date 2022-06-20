@@ -6,8 +6,8 @@ import de.tilmanschweitzer.sudoku.model.SudokuPosition;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.tilmanschweitzer.sudoku.model.Sudoku.isValidValue;
 import static de.tilmanschweitzer.sudoku.model.SudokuPosition.allPositions;
+import static de.tilmanschweitzer.sudoku.model.SudokuUtils.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
@@ -33,9 +33,11 @@ public class DeductiveSudokuSolver implements SudokuSolver {
         return new DeductiveSudokuSolver(null, failWhenUnsolved);
     }
 
-    private enum DeductionLevel {
-        LEVEL_1,
-        LEVEL_2
+    private class DeductionLevel {
+        private static final int LEVEL_1 = 1;
+        private static final int LEVEL_2 = 2;
+
+        private static final int LEVEL_3 = 3;
     }
 
     @Override
@@ -53,23 +55,31 @@ public class DeductiveSudokuSolver implements SudokuSolver {
         }
 
         boolean changedSomethingInTheLastIteration;
-        DeductionLevel currentLevel = DeductionLevel.LEVEL_1;
+        int currentDeductionLevel = DeductionLevel.LEVEL_1;
 
         do {
             changedSomethingInTheLastIteration = false;
-            for (SudokuPosition openPosition : openPositions.stream().collect(Collectors.toUnmodifiableList())) {
-                if (sudoku.checkAndRuleOut(openPosition, currentLevel)) {
+            final List<SudokuPosition> previousOpenPositions = openPositions.stream().collect(Collectors.toUnmodifiableList());
+
+            for (SudokuPosition openPosition : previousOpenPositions) {
+                if (sudoku.checkAndRuleOut(openPosition, currentDeductionLevel)) {
                     changedSomethingInTheLastIteration = true;
                     openPositions.remove(openPosition);
                 }
             }
-            if (!changedSomethingInTheLastIteration && currentLevel == DeductionLevel.LEVEL_1) {
-                currentLevel = DeductionLevel.LEVEL_2;
-                changedSomethingInTheLastIteration = true;
-            } else {
-                currentLevel = DeductionLevel.LEVEL_1;
+            if (!changedSomethingInTheLastIteration) {
+                for (SudokuPosition openPosition : previousOpenPositions) {
+                    if (sudoku.findAndRuleOutConjugatePairs(openPosition)) {
+                        changedSomethingInTheLastIteration = true;
+                    }
+                }
             }
-        } while (!sudoku.internalSudoku.isCompleted() && (changedSomethingInTheLastIteration));
+            if (!changedSomethingInTheLastIteration) {
+                currentDeductionLevel++;
+            } else {
+                currentDeductionLevel = DeductionLevel.LEVEL_1;
+            }
+        } while (!sudoku.internalSudoku.isCompleted() && (changedSomethingInTheLastIteration || currentDeductionLevel <= DeductionLevel.LEVEL_3));
 
         if (!sudoku.internalSudoku.isCompleted()) {
             if (failWhenUnsolved) {
@@ -109,14 +119,14 @@ public class DeductiveSudokuSolver implements SudokuSolver {
             return possibleValues[position.getRow()][position.getCol()];
         }
 
-        private boolean checkAndRuleOut(SudokuPosition position, DeductionLevel currentLevel) {
+        private boolean checkAndRuleOut(SudokuPosition position, int currentDeductionLevel) {
             final List<Integer> possibleValuesForPosition = getPossibleValuesForPosition(position);
             if (possibleValuesForPosition.size() == 1) {
                 int lastPossibleValue = possibleValuesForPosition.get(0);
                 setValue(position, lastPossibleValue);
                 return true;
             }
-            if (currentLevel == DeductionLevel.LEVEL_2) {
+            if (currentDeductionLevel == DeductionLevel.LEVEL_2) {
                 for (Integer possibleValueForPosition : possibleValuesForPosition) {
                     if (checkIfValueIsUniquePosition(position, possibleValueForPosition)) {
                         setValue(position, possibleValueForPosition);
@@ -124,7 +134,43 @@ public class DeductiveSudokuSolver implements SudokuSolver {
                     }
                 }
             }
+
             return false;
+        }
+
+        private boolean findAndRuleOutConjugatePairs(SudokuPosition position) {
+            final List<Integer> possibleValuesForPosition = getPossibleValuesForPosition(position);
+            if (possibleValuesForPosition.size() == 2) {
+                boolean foundNewConjugatePairInRows = findAndRuleOutConjugatePairs(position.getPositionsInSameRow(), possibleValuesForPosition);
+                boolean foundNewConjugatePairInColumns = findAndRuleOutConjugatePairs(position.getPositionsInSameColumn(), possibleValuesForPosition);
+                boolean foundNewConjugatePairInBoxes = findAndRuleOutConjugatePairs(position.getPositionsInSameBox(), possibleValuesForPosition);
+                return foundNewConjugatePairInRows || foundNewConjugatePairInColumns || foundNewConjugatePairInBoxes;
+            }
+            return false;
+        }
+
+        private boolean findAndRuleOutConjugatePairs(List<SudokuPosition> positions, List<Integer> possibleValuesForPosition) {
+            final List<SudokuPosition> conjugatePairs = findConjugatePairs(positions, possibleValuesForPosition);
+            if (conjugatePairs.size() != 2) {
+                return false;
+            }
+            return ruleOutConjugatePairsInPositions(positions, conjugatePairs, possibleValuesForPosition);
+        }
+
+        private List<SudokuPosition> findConjugatePairs(List<SudokuPosition> positions, List<Integer> possibleValuesForPosition) {
+            return positions.stream()
+                    .filter(positionToBeChecked -> getPossibleValuesForPosition(positionToBeChecked).equals(possibleValuesForPosition))
+                    .collect(Collectors.toUnmodifiableList());
+        }
+
+        private boolean ruleOutConjugatePairsInPositions(List<SudokuPosition> positions, List<SudokuPosition> conjugatePair, List<Integer> possibleValuesForPosition) {
+            final long changes = positions.stream().filter(positionsInRow -> {
+                if (conjugatePair.contains(positionsInRow)) {
+                    return false;
+                }
+                return getPossibleValuesForPosition(positionsInRow).removeAll(possibleValuesForPosition);
+            }).count();
+            return changes > 0;
         }
 
         private boolean checkIfValueIsUniquePosition(SudokuPosition position, int possibleValueForPosition) {
@@ -231,6 +277,5 @@ public class DeductiveSudokuSolver implements SudokuSolver {
         public String toString() {
             return toPrintableString();
         }
-
     }
 }
