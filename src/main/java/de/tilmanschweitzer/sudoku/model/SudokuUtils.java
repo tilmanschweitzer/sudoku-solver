@@ -5,7 +5,7 @@ import java.util.List;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 public final class SudokuUtils {
-    private static boolean isUnsetValue(int value) {
+    public static boolean isUnsetValue(int value) {
         return value == 0;
     }
 
@@ -20,7 +20,7 @@ public final class SudokuUtils {
 
     public static List<Integer> getDuplicateValues(List<Integer> values) {
         return values.stream()
-                .filter(value -> values.stream().filter(otherValue -> otherValue == value).count() > 1)
+                .filter(value -> values.stream().filter(otherValue -> otherValue.equals(value)).count() > 1)
                 .distinct()
                 .collect(toUnmodifiableList());
     }

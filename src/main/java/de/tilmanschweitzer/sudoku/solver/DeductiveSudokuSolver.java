@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import static de.tilmanschweitzer.sudoku.model.SudokuPosition.allPositions;
 import static de.tilmanschweitzer.sudoku.model.SudokuUtils.*;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.IntStream.range;
 
 public class DeductiveSudokuSolver implements SudokuSolver {
@@ -36,7 +37,6 @@ public class DeductiveSudokuSolver implements SudokuSolver {
     private class DeductionLevel {
         private static final int LEVEL_1 = 1;
         private static final int LEVEL_2 = 2;
-
         private static final int LEVEL_3 = 3;
     }
 
@@ -44,22 +44,18 @@ public class DeductiveSudokuSolver implements SudokuSolver {
     public Sudoku solve(Sudoku originalSudoku) {
         final LogicSudokuSolverInternalModel sudoku = new LogicSudokuSolverInternalModel();
 
-        final List<SudokuPosition> openPositions = new ArrayList<>();
+        final List<SudokuPosition> openPositions = allPositions.stream()
+                .filter(position -> isUnsetValue(originalSudoku.getValueForPosition(position)))
+                .collect(toList());
 
-        for (SudokuPosition position : SudokuPosition.allPositions) {
-            if (originalSudoku.isPositionValid(position)) {
-                sudoku.setValue(position, originalSudoku.getValueForPosition(position));
-            } else {
-                openPositions.add(position);
-            }
-        }
+        allPositions.forEach(position -> sudoku.setValue(position, originalSudoku.getValueForPosition(position)));
 
         boolean changedSomethingInTheLastIteration;
         int currentDeductionLevel = DeductionLevel.LEVEL_1;
 
         do {
             changedSomethingInTheLastIteration = false;
-            final List<SudokuPosition> previousOpenPositions = openPositions.stream().collect(Collectors.toUnmodifiableList());
+            final List<SudokuPosition> previousOpenPositions = openPositions.stream().collect(toUnmodifiableList());
 
             for (SudokuPosition openPosition : previousOpenPositions) {
                 if (sudoku.checkAndRuleOut(openPosition, currentDeductionLevel)) {
@@ -67,9 +63,12 @@ public class DeductiveSudokuSolver implements SudokuSolver {
                     openPositions.remove(openPosition);
                 }
             }
-            if (!changedSomethingInTheLastIteration) {
+            if (!changedSomethingInTheLastIteration && currentDeductionLevel == DeductionLevel.LEVEL_3) {
                 for (SudokuPosition openPosition : previousOpenPositions) {
-                    if (sudoku.findAndRuleOutConjugatePairs(openPosition)) {
+                    if (sudoku.findAndRuleOutConjugatePairs(openPosition, 2)) {
+                        changedSomethingInTheLastIteration = true;
+                    }
+                    if (sudoku.findAndRuleOutXYWings(openPosition, previousOpenPositions)) {
                         changedSomethingInTheLastIteration = true;
                     }
                 }
@@ -106,7 +105,7 @@ public class DeductiveSudokuSolver implements SudokuSolver {
         final List<Integer>[][] possibleValues = new ArrayList[9][9];
 
         private LogicSudokuSolverInternalModel() {
-            for (SudokuPosition positions : SudokuPosition.allPositions) {
+            for (SudokuPosition positions : allPositions) {
                 possibleValues[positions.getRow()][positions.getCol()] = range(1, 10).boxed().collect(toList());
             }
         }
@@ -117,6 +116,14 @@ public class DeductiveSudokuSolver implements SudokuSolver {
 
         private List<Integer> getPossibleValuesForPosition(SudokuPosition position) {
             return possibleValues[position.getRow()][position.getCol()];
+        }
+
+        private int numberOfPossibleValueForPosition(SudokuPosition position) {
+            return getPossibleValuesForPosition(position).size();
+        }
+
+        private boolean matchesNumberOfPossibleValuesForPosition(int expectedNumber, SudokuPosition position) {
+            return numberOfPossibleValueForPosition(position) == expectedNumber;
         }
 
         private boolean checkAndRuleOut(SudokuPosition position, int currentDeductionLevel) {
@@ -138,20 +145,20 @@ public class DeductiveSudokuSolver implements SudokuSolver {
             return false;
         }
 
-        private boolean findAndRuleOutConjugatePairs(SudokuPosition position) {
+        private boolean findAndRuleOutConjugatePairs(SudokuPosition position, int pairMembers) {
             final List<Integer> possibleValuesForPosition = getPossibleValuesForPosition(position);
-            if (possibleValuesForPosition.size() == 2) {
-                boolean foundNewConjugatePairInRows = findAndRuleOutConjugatePairs(position.getPositionsInSameRow(), possibleValuesForPosition);
-                boolean foundNewConjugatePairInColumns = findAndRuleOutConjugatePairs(position.getPositionsInSameColumn(), possibleValuesForPosition);
-                boolean foundNewConjugatePairInBoxes = findAndRuleOutConjugatePairs(position.getPositionsInSameBox(), possibleValuesForPosition);
+            if (possibleValuesForPosition.size() == pairMembers) {
+                boolean foundNewConjugatePairInRows = findAndRuleOutConjugatePairs(position.getPositionsInSameRow(), possibleValuesForPosition, pairMembers);
+                boolean foundNewConjugatePairInColumns = findAndRuleOutConjugatePairs(position.getPositionsInSameColumn(), possibleValuesForPosition, pairMembers);
+                boolean foundNewConjugatePairInBoxes = findAndRuleOutConjugatePairs(position.getPositionsInSameBox(), possibleValuesForPosition, pairMembers);
                 return foundNewConjugatePairInRows || foundNewConjugatePairInColumns || foundNewConjugatePairInBoxes;
             }
             return false;
         }
 
-        private boolean findAndRuleOutConjugatePairs(List<SudokuPosition> positions, List<Integer> possibleValuesForPosition) {
+        private boolean findAndRuleOutConjugatePairs(List<SudokuPosition> positions, List<Integer> possibleValuesForPosition, int pairMembers) {
             final List<SudokuPosition> conjugatePairs = findConjugatePairs(positions, possibleValuesForPosition);
-            if (conjugatePairs.size() != 2) {
+            if (conjugatePairs.size() != pairMembers) {
                 return false;
             }
             return ruleOutConjugatePairsInPositions(positions, conjugatePairs, possibleValuesForPosition);
@@ -160,7 +167,7 @@ public class DeductiveSudokuSolver implements SudokuSolver {
         private List<SudokuPosition> findConjugatePairs(List<SudokuPosition> positions, List<Integer> possibleValuesForPosition) {
             return positions.stream()
                     .filter(positionToBeChecked -> getPossibleValuesForPosition(positionToBeChecked).equals(possibleValuesForPosition))
-                    .collect(Collectors.toUnmodifiableList());
+                    .collect(toUnmodifiableList());
         }
 
         private boolean ruleOutConjugatePairsInPositions(List<SudokuPosition> positions, List<SudokuPosition> conjugatePair, List<Integer> possibleValuesForPosition) {
@@ -171,6 +178,78 @@ public class DeductiveSudokuSolver implements SudokuSolver {
                 return getPossibleValuesForPosition(positionsInRow).removeAll(possibleValuesForPosition);
             }).count();
             return changes > 0;
+        }
+
+        public boolean findAndRuleOutXYWings(SudokuPosition position, List<SudokuPosition> openPositions) {
+            final List<Integer> possibleValuesForPosition = getPossibleValuesForPosition(position);
+
+            boolean foundAndRuledOutXYWing = false;
+
+            if (!matchesNumberOfPossibleValuesForPosition(2, position)) {
+                return false;
+            }
+
+            final Integer leftValue = possibleValuesForPosition.get(0);
+            final Integer rightValue = possibleValuesForPosition.get(1);
+
+            final List<SudokuPosition> xyWingCandidates = position.getPositionsToBeRuledOut().stream()
+                    .filter(otherPosition -> {
+                        final List<Integer> possibleValuesForOtherPosition = getPossibleValuesForPosition(otherPosition);
+                        return possibleValuesForOtherPosition.size() == 2 &&
+                                (possibleValuesForOtherPosition.contains(leftValue) || possibleValuesForOtherPosition.contains(rightValue));
+                    }).collect(toUnmodifiableList());
+
+
+                final List<Integer> xWingValues = xyWingCandidates.stream()
+                        .map(xyWingCandidate -> getPossibleValuesForPosition(xyWingCandidate).stream()
+                                .filter(xyWingValue -> !xyWingValue.equals(rightValue) && !xyWingValue.equals(leftValue))
+                                .collect(toUnmodifiableList()))
+                        .filter(possibleValuesForXYWing -> possibleValuesForXYWing.size() == 1)
+                        .map(possibleValuesForXYWing -> possibleValuesForXYWing.get(0))
+                        .collect(toList());
+
+                final List<Integer> duplicateValues = getDuplicateValues(xWingValues);
+                if (duplicateValues.size() != 1) {
+                    return false;
+                }
+
+                final Integer duplicateValue = duplicateValues.get(0);
+
+            final Optional<SudokuPosition> xyWingLeftOptional = xyWingCandidates.stream()
+                    .filter(xyWingCandidate -> {
+                        final List<Integer> values = getPossibleValuesForPosition(xyWingCandidate);
+                        return values.contains(leftValue) && values.contains(duplicateValue);
+                    })
+                    .findFirst();
+
+            final Optional<SudokuPosition> xyWingRightOptional = xyWingCandidates.stream()
+                    .filter(xyWingCandidate -> {
+                        final List<Integer> values = getPossibleValuesForPosition(xyWingCandidate);
+                        return values.contains(rightValue) && values.contains(duplicateValue);
+                    })
+                    .findFirst();
+
+            if (xyWingLeftOptional.isEmpty() || xyWingRightOptional.isEmpty()) {
+                return false;
+            }
+
+            final SudokuPosition xyWingLeft = xyWingLeftOptional.get();
+            final SudokuPosition xyWingRight = xyWingRightOptional.get();
+
+            return openPositions.stream().map(openPosition -> {
+                if (xyWingLeft == openPosition || xyWingRight == openPosition) {
+                    return false;
+                }
+                final List<Integer> possibleValuesForOpenPosition = getPossibleValuesForPosition(openPosition);
+                if (!possibleValuesForOpenPosition.contains(duplicateValue)) {
+                    return false;
+                }
+                if (!(openPosition.sharesSameHouse(xyWingLeft) && openPosition.sharesSameHouse(xyWingRight))) {
+                    return false;
+                }
+                possibleValuesForOpenPosition.remove(duplicateValue);
+                return true;
+            }).anyMatch(value -> value);
         }
 
         private boolean checkIfValueIsUniquePosition(SudokuPosition position, int possibleValueForPosition) {
@@ -202,15 +281,15 @@ public class DeductiveSudokuSolver implements SudokuSolver {
                 return false;
             }
 
-            if (isValidValue(value)) {
-                internalSudoku.setValueForPosition(position, value);
-                position.getPositionsToBeRuledOut().forEach(positionInSameRow -> {
-                    getPossibleValuesForPosition(positionInSameRow).remove((Integer) value);
-                });
-                possibleValues[position.getRow()][position.getCol()].clear();
+            if (isUnsetValue(value)) {
+                return false;
             }
-
-            return false;
+            internalSudoku.setValueForPosition(position, value);
+            position.getPositionsToBeRuledOut().forEach(positionInSameRow -> {
+                getPossibleValuesForPosition(positionInSameRow).remove((Integer) value);
+            });
+            possibleValues[position.getRow()][position.getCol()].clear();
+            return true;
         }
 
         public String toPrintableString() {
@@ -222,8 +301,8 @@ public class DeductiveSudokuSolver implements SudokuSolver {
             final String boxSeparator = lineSeparator.replaceAll("-", "=");
             final String possibleValuesTemplate = "123 456 789";
 
-            final StringBuffer sb = new StringBuffer();
-            final StringBuffer possibleValuesSb = new StringBuffer();
+            final StringBuilder sb = new StringBuilder();
+            final StringBuilder possibleValuesSb = new StringBuilder();
 
             sb.append(boxSeparator);
 

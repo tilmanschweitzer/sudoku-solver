@@ -93,4 +93,28 @@ class SudokuPositionTest {
         assertEquals(List.of(3, 3, 3, 4, 4, 4, 5, 5, 5), positionsInSameRow.stream().map(SudokuPosition::getRow).collect(toUnmodifiableList()));
         assertEquals(List.of(6, 7, 8, 6, 7, 8, 6, 7, 8), positionsInSameRow.stream().map(SudokuPosition::getCol).collect(toUnmodifiableList()));
     }
+
+    @Test
+    public void sharesSameHouse_returnsTrueWhenInSameRow() {
+        assertTrue(SudokuPosition.of(0, 0).sharesSameHouse(SudokuPosition.of(0, 8)));
+        assertTrue(SudokuPosition.of(8, 4).sharesSameHouse(SudokuPosition.of(8, 2)));
+    }
+
+    @Test
+    public void sharesSameHouse_returnsTrueWhenInSameColumn() {
+        assertTrue(SudokuPosition.of(0, 5).sharesSameHouse(SudokuPosition.of(1, 5)));
+        assertTrue(SudokuPosition.of(5, 4).sharesSameHouse(SudokuPosition.of(8, 4)));
+    }
+
+    @Test
+    public void sharesSameHouse_returnsTrueWhenInSameBox() {
+        assertTrue(SudokuPosition.of(0, 0).sharesSameHouse(SudokuPosition.of(2, 2)));
+        assertTrue(SudokuPosition.of(6, 6).sharesSameHouse(SudokuPosition.of(8, 8)));
+    }
+
+    @Test
+    public void sharesSameHouse_returnsFalseWhenInSameRowColumnOrBox() {
+        assertFalse(SudokuPosition.of(0, 0).sharesSameHouse(SudokuPosition.of(8, 8)));
+        assertFalse(SudokuPosition.of(0, 0).sharesSameHouse(SudokuPosition.of(3, 1)));
+    }
 }

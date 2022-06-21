@@ -81,6 +81,10 @@ public class SudokuPosition {
         return positionsToBeRuledOut.get(this);
     }
 
+    public boolean sharesSameHouse(SudokuPosition otherSudoku) {
+        return getRow() == otherSudoku.getRow() || getCol() == otherSudoku.getCol() || getBox() == otherSudoku.getBox();
+    }
+
     @Override
     public int hashCode() {
         return index;

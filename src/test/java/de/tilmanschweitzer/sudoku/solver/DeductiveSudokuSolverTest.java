@@ -31,6 +31,11 @@ class DeductiveSudokuSolverTest {
     Sudoku unsolvedSudokuLevel3XYWing;
     Sudoku solvedSudokuLevel3XYWing;
 
+    Sudoku unsolvedSudokuLevel3NextChallenge;
+    Sudoku solvedSudokuLevel3NextChallenge;
+
+    Sudoku unsolvedTest;
+
     @BeforeEach
     public void setup() {
         unsolvedSudokuLevel1 = Sudoku.fromString("000003610000015007000008090086000700030800100500120309005060904060900530403701008");
@@ -54,6 +59,9 @@ class DeductiveSudokuSolverTest {
 
         unsolvedSudokuLevel3XYWing = Sudoku.fromString("010060078000821004400500012000050460000206000706300080390000705000003120672005009");
         solvedSudokuLevel3XYWing = Sudoku.fromString("215469378937821654468537912129758463843216597756394281391682745584973126672145839");
+
+        unsolvedSudokuLevel3NextChallenge = Sudoku.fromString("000002534000010280200034000020000740906000300140203000708000001300009600460070803");
+        solvedSudokuLevel3NextChallenge = Sudoku.fromString("671892534534617289289534176823961745956748312147253968798326451315489627462175893");
     }
 
     @Test
@@ -99,6 +107,12 @@ class DeductiveSudokuSolverTest {
     public void solve_solvesTheSudokuLevel3XYWing() {
         final Sudoku result = sudokuSolver.solve(unsolvedSudokuLevel3XYWing);
         assertThat(result, equalTo(solvedSudokuLevel3XYWing));
+    }
+
+    @Test
+    public void solve_solvesTheSudokuLevel3NextChallenge() {
+        final Sudoku result = sudokuSolver.solve(unsolvedSudokuLevel3NextChallenge);
+        assertThat(result, equalTo(solvedSudokuLevel3NextChallenge));
     }
 
     @Test
