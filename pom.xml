@@ -24,6 +24,7 @@
     </properties>
 
     <modules>
+        <module>core</module>
         <module>cli</module>
     </modules>
 
