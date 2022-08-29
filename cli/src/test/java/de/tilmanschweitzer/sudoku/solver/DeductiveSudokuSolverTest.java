@@ -2,7 +2,9 @@ package de.tilmanschweitzer.sudoku.solver;
 
 import de.tilmanschweitzer.sudoku.model.Sudoku;
 import de.tilmanschweitzer.sudoku.model.SudokuPosition;
+import net.bytebuddy.implementation.bind.annotation.IgnoreForBinding;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -109,6 +111,8 @@ class DeductiveSudokuSolverTest {
         assertThat(result, equalTo(solvedSudokuLevel3XYWing));
     }
 
+
+    @Disabled
     @Test
     public void solve_solvesTheSudokuLevel3NextChallenge() {
         final Sudoku result = sudokuSolver.solve(unsolvedSudokuLevel3NextChallenge);

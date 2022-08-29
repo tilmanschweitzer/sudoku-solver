@@ -2,5 +2,5 @@
 
 set -e
 
-mvn clean compile assembly:single
+mvn clean package
 

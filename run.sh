@@ -2,6 +2,6 @@
 
 set -e
 
-jar_path=$(ls target/*.jar)
+jar_path=$(ls cli/target/*-jar-with-dependencies.jar)
 
 java -jar ${jar_path} $@
