@@ -27,7 +27,7 @@ public class DeductiveSudokuSolver implements SudokuSolver {
     }
 
     public static DeductiveSudokuSolver createWithFallbackSolver(SudokuSolver fallbackSolver) {
-        return new DeductiveSudokuSolver(fallbackSolver, true);
+        return new DeductiveSudokuSolver(fallbackSolver, false);
     }
 
     public static DeductiveSudokuSolver withFailWhenUnsolved(boolean failWhenUnsolved) {

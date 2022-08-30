@@ -2,6 +2,7 @@ package de.tilmanschweitzer.sudoku.app;
 
 import de.tilmanschweitzer.sudoku.model.Sudoku;
 import de.tilmanschweitzer.sudoku.model.SudokuFormatException;
+import de.tilmanschweitzer.sudoku.solver.BacktrackingSudokuSolver;
 import de.tilmanschweitzer.sudoku.solver.DeductiveSudokuSolver;
 import de.tilmanschweitzer.sudoku.solver.SudokuSolver;
 
@@ -9,15 +10,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class App {
 
     public static void main(String[] args) throws IOException {
-        System.out.println(Arrays.asList(args));
-
         if (args.length < 1) {
             System.err.println("No filename given");
             System.exit(1);
@@ -27,7 +25,7 @@ public class App {
         final int offset = 1;
         final int limit = args.length > 1 ? Integer.parseInt(args[1]) : 100;
 
-        final SudokuSolver sudokuSolver = DeductiveSudokuSolver.withFailWhenUnsolved(false);
+        final SudokuSolver sudokuSolver = DeductiveSudokuSolver.createWithFallbackSolver(new BacktrackingSudokuSolver());
         final ExecutionTimer executionTimer = new ExecutionTimer();
 
         try (BufferedReader bufferedReader = Files.newBufferedReader(Path.of(filename))) {
@@ -41,11 +39,6 @@ public class App {
                 final Sudoku expectedSolution = Sudoku.fromString(split[1]);
 
                 final Sudoku solvedSudoku = executionTimer.execute(() -> sudokuSolver.solve(unsolvedSudoku));
-
-                System.out.println(unsolvedSudoku);
-                System.out.println(solvedSudoku);
-                System.out.println("Execution took: " + executionTimer.getLatestExecutionTime().orElse(0L) + "ms");
-                System.out.println("==============================\n");
 
                 return solvedSudoku.equals(expectedSolution);
             }).collect(Collectors.toUnmodifiableList());
